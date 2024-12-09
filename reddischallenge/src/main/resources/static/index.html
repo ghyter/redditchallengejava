@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Reddit Challenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand navbar-dark bg-dark" aria-label="Second navbar example">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="#">Reddit Challenge (Java)</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample02" aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+        
+              <div class="collapse navbar-collapse" id="navbarsExample02">
+                <ul class="navbar-nav me-auto">
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                  </li>
+                </ul>
+                <form>
+                  <input class="form-control" type="text" placeholder="Search" aria-label="Search">
+                </form>
+              </div>
+            </div>
+          </nav>
+        
+    </header>
+    
+
+    
+<h1>Java Reddit Challenge</h1>
+
+<div>This is the Java version of the same application</div>
+
+<div class="container mt-4">
+  <div class="row align-items-center">
+      <!-- Subreddit Select Box -->
+      <div class="col-md-4">
+          <label for="subreddit-select" class="form-label">Subreddit</label>
+          <select id="subreddit-select" class="form-select">
+              <option value="">Select a subreddit</option>
+              <!-- Options will be populated dynamically -->
+          </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="col-md-2">
+          <button id="start-button" class="btn btn-primary w-100">Start</button>
+      </div>
+      <div class="col-md-2">
+          <button id="end-button" class="btn btn-danger w-100">End</button>
+      </div>
+
+      <!-- Status Box -->
+      <div class="col-md-4">
+          <div class="border p-3 rounded">
+              <p><strong>Status:</strong> <span id="status-label">Not Connected</span></p>
+              <p><strong>Last Event:</strong> <span id="last-event-label">None</span></p>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- JavaScript to populate dropdown and handle WebSocket -->
+<script>
+  // Array of subreddit names
+  const subreddits = ["csharp", "programminghumor", "technology", "science", "askreddit", "memes"];
+
+  // Populate the subreddit dropdown
+  const subredditSelect = document.getElementById('subreddit-select');
+  subreddits.forEach(subreddit => {
+      const option = document.createElement('option');
+      option.value = subreddit;
+      option.textContent = subreddit;
+      subredditSelect.appendChild(option);
+  });
+
+  // References to Status and Last Event labels
+  const statusLabel = document.getElementById('status-label');
+  const lastEventLabel = document.getElementById('last-event-label');
+
+  // WebSocket Connection
+  const websocket = new WebSocket("ws://localhost:8080/ws"); // Replace with your WebSocket URL
+
+  // WebSocket Event Handlers
+  websocket.onopen = () => {
+      statusLabel.textContent = "Connected";
+      websocket.send(JSON.stringify({ action: "connect" }));
+  };
+
+  websocket.onmessage = (event) => {
+      // Assuming the WebSocket sends JSON data with a "lastEvent" property
+      const data = JSON.parse(event.data);
+      lastEventLabel.textContent = data.lastEvent || "No Data";
+  };
+
+  websocket.onerror = () => {
+      statusLabel.textContent = "Error";
+  };
+
+  websocket.onclose = () => {
+      statusLabel.textContent = "Disconnected";
+  };
+
+  // Start and End button actions (Optional customization)
+  document.getElementById('start-button').addEventListener('click', () => {
+      if (websocket.readyState === WebSocket.OPEN) {
+          websocket.send(JSON.stringify({ action: "start", subreddit: subredditSelect.value }));
+      }
+  });
+
+  document.getElementById('end-button').addEventListener('click', () => {
+      if (websocket.readyState === WebSocket.OPEN) {
+          websocket.send(JSON.stringify({ action: "end", subreddit: subredditSelect.value }));
+      }
+  });
+</script>
+
+
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="/js/app.js"></script>
+</html>
